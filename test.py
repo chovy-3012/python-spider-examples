@@ -5,6 +5,7 @@ import re
 from urllib import request
 
 from bs4 import BeautifulSoup
+from time import ctime,sleep
 
 
 class CSDNSpider:
@@ -53,8 +54,9 @@ class CSDNSpider:
             # 博文链接
             link = item.find('span', 'link_title').a.get('href')
             resp=request.urlopen("http://blog.csdn.net"+link)
+            sleep(5)
             html=resp.read()
-            print(html)
+            #print(html)
             blog += '\t博客链接:' + link
             # 博文发表日期
             postdate = item.find('span', 'link_postdate').get_text()
@@ -84,11 +86,13 @@ def saveFile(datas ,pageIndex):
 if __name__=="__main__":
     spider = CSDNSpider()
 
-    pageNum = spider.getTotalPages()
-    print("博客总页数：", pageNum)
-
+    i=0
     while(1>0):
+      pageNum = spider.getTotalPages()
+      print("博客总页数：", pageNum)
       for index in range(pageNum):
          print("正在处理第%s页…" % (index+1))
          blogsInfo = spider.getBlogInfo(index+1)
-         saveFile(blogsInfo, index)
+         i=i+1
+         print(i)
+         #saveFile(blogsInfo, index)
