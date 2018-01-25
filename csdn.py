@@ -6,6 +6,7 @@ from urllib import request
 
 from bs4 import BeautifulSoup
 from time import ctime,sleep
+import random
 
 
 class CSDNSpider:
@@ -48,13 +49,17 @@ class CSDNSpider:
         # 得到目标信息
         blog_items = soup.find_all('div', 'list_item article_item')
         for item in blog_items:
+            # 随机阅读
+            random_=random.randrange(10)
+            if random_!=0:
+                continue
             # 博文主题
             title = item.find('span', 'link_title').a.get_text()
             blog = '标题:' + title
             # 博文链接
             link = item.find('span', 'link_title').a.get('href')
             resp=request.urlopen("http://blog.csdn.net"+link)
-            sleep(5)
+            sleep(1)
             html=resp.read()
             #print(html)
             blog += '\t博客链接:' + link
