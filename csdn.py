@@ -5,7 +5,7 @@ import re
 from urllib import request
 
 from bs4 import BeautifulSoup
-from time import ctime,sleep
+from time import ctime, sleep
 import random
 
 
@@ -35,7 +35,7 @@ class CSDNSpider:
         # 得到如下内容“209条  共14页”
         pageNumText = soup.find('div', 'pagelist').span.get_text()
         # 利用正则表达式进一步提取得到分页数
-        pageNum =re.findall(re.compile(pattern=r'共(.*?)页'), pageNumText)[0]
+        pageNum = re.findall(re.compile(pattern=r'共(.*?)页'), pageNumText)[0]
         return int(pageNum)
 
     # 读取每个页面上各博文的主题、链接、日期、访问量、评论数等信息
@@ -43,31 +43,35 @@ class CSDNSpider:
         res = []
         # 每页的链接如http://blog.csdn.net/u012050154/article/list/1
         # 所以按pageIndex更新url
-        url = self.url[0:self.url.rfind('/')+1] + str(pageIndx)
+        url = self.url[0:self.url.rfind('/') + 1] + str(pageIndx)
         # 按url解析得到BeautifulSoup对象
         soup = self.getBeautifulSoup(url)
         # 得到目标信息
         blog_items = soup.find_all('div', 'list_item article_item')
         for item in blog_items:
             # 随机阅读
-            random_=random.randrange(10)
-            if random_!=0:
+            random_1 = 1
+            if pageIndx == 1 or pageIndx == 2:
+                random_ = random.randrange(20)
+            else:
+                random_ = random.randrange(50)
+            if random_ >= random.randrange(10):
                 continue
             # 博文主题
             title = item.find('span', 'link_title').a.get_text()
             blog = '标题:' + title
             # 博文链接
             link = item.find('span', 'link_title').a.get('href')
-            resp=request.urlopen("http://blog.csdn.net"+link)
-            sleep(1)
-            html=resp.read()
-            #print(html)
+            resp = request.urlopen("http://blog.csdn.net" + link)
+            sleep(2)
+            html = resp.read()
+            # print(html)
             blog += '\t博客链接:' + link
             # 博文发表日期
             postdate = item.find('span', 'link_postdate').get_text()
             blog += '\t发表日期:' + postdate
             # 博文的访问量
-            views_text = item.find('span', 'link_view').get_text() # 阅读(38)
+            views_text = item.find('span', 'link_view').get_text()  # 阅读(38)
             views = re.findall(re.compile(r'(\d+)'), views_text)[0]
             blog += '\t访问量:' + views
             # 博文的评论数
@@ -77,9 +81,11 @@ class CSDNSpider:
 
             print(blog)
             res.append(blog)
+        sleep(5)
         return res
 
-def saveFile(datas ,pageIndex):
+
+def saveFile(datas, pageIndex):
     path = "D:\\test\\page_" + str(pageIndex + 1) + ".txt"
     with open(path, 'w', encoding='gbk') as file:
         file.write('当前页：' + str(pageIndex + 1) + '\n')
@@ -87,17 +93,19 @@ def saveFile(datas ,pageIndex):
             file.write(data)
 
 
-
-if __name__=="__main__":
+if __name__ == "__main__":
     spider = CSDNSpider()
 
-    i=0
-    while(1>0):
-      pageNum = spider.getTotalPages()
-      print("博客总页数：", pageNum)
-      for index in range(pageNum):
-         print("正在处理第%s页…" % (index+1))
-         blogsInfo = spider.getBlogInfo(index+1)
-         i=i+1
-         print(i)
-         #saveFile(blogsInfo, index)
+    i = 0
+    while (1 > 0):
+        try:
+            pageNum = spider.getTotalPages()
+            print("博客总页数：", pageNum)
+            for index in range(pageNum):
+                print("正在处理第%s页…" % (index + 1))
+                blogsInfo = spider.getBlogInfo(index + 1)
+                i = i + 1
+                print(i)
+        except Exception:
+            print("error")
+        # saveFile(blogsInfo, index)
